@@ -5,6 +5,7 @@ public:
     int _r, _g, _b;
     Color3(int r, int g, int b);
     ~Color3() {};
+    void intensity(double proc);
 };
 
 class Image {

@@ -10,9 +10,13 @@ public:
 
 class Face {
 public:
-    unsigned int _v[4];
-    Face(unsigned int v1, unsigned int v2, unsigned int v3, unsigned int v4);
-    ~Face() {};
+    unsigned int* _v;
+    int size;
+    Face();
+    ~Face() {
+        delete[] _v;
+    }
+    void add(unsigned int v);
 };
 
 class ThreeD {

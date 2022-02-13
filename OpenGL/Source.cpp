@@ -108,9 +108,9 @@ int main() {
     int h = 1000, w = 1000;
     Color3 col(255, 165, 0);
     Image im(h, w);
-    //obj.provSet(im, col, 1, 500., -600.,-3.1416/2);
-    obj.polSet(im, col, 0.5, 500,0);
-    //im.save((char*)"pol5.bmp");
+    //obj.provSet(im, col, 0.5, 500., 0.);
+    obj.polSet(im, col, 0.5, 500,10);
+    //im.save((char*)"pol6.bmp");
     im.show();
 }
 
