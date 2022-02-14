@@ -104,7 +104,7 @@ void Image::show() {
     //COLORREF COLOR;
     //Draw pixels
 
-#pragma omp parallel for 
+//#pragma omp parallel for 
     for (int i = 0; i < _width; i++)
     {
         for (int j = 0; j < _height; j++) {

@@ -26,7 +26,7 @@ public:
 
     void save8bit(char* filename, char** colore) const;
 
-    void save1bit(char* filename, char** colore) const;
+    void save1bit(char* filename, char** colore = new char* [2]{ new char[] { (char)0, (char)0, (char)0, (char)255 }, new char[] { (char)255, (char)255, (char)255, (char)255 } }) const;
 
     void line(int x0, int y0, int x1, int y1, Color3 color);
 

@@ -100,9 +100,9 @@ double min_elem(double* x, int size) {
 
 void ThreeD::triangle(Face face, Image& image, Color3 color, double cof, double offsetX, double offsetY, double* z_buf) {
     //int ch = (face._v[3] == 0 ? 1 : 0);
-    double* x = new double[face.size];
-    double* y = new double[face.size];
-    double* z = new double[face.size];
+    double* x = new double[5];
+    double* y = new double[5];
+    double* z = new double[5];
     for (int i = 0; i < face.size; i++)
     {
         x[i] = _coord[face._v[i] - 1]._x;
