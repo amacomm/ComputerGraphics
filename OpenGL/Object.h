@@ -41,6 +41,6 @@ public:
 
     void provSet(Image& image, Color3 color, double cof, double offsetX, double offsetY, double fi=0.0, double psi=0., double nu=0.);
     void polSet(Image& image, Color3 color, double cof, double offsetX, double offsetY, double fi=0, double psi=0, double nu=0);
-    void triangle(Face face, Image& image, Color3 color, double cof, double offsetX, double offsetY, double* z_buf);
+    void triangle(Face face, Image& image, Color3 color, double cof, double offsetX, double offsetY, int* z_buf, double fi=0);
 
 };
