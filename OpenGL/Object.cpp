@@ -7,6 +7,8 @@
 
 Coord::Coord(double x = 0, double y = 0, double z = 0) :_x(x), _y(y), _z(z) {};
 
+Norm::Norm(double x = 0, double y = 0, double z = 0) :_x(x), _y(y), _z(z) {};
+
 Face::Face(){
     _v = new unsigned int[1];
     size = 0;
@@ -23,7 +25,7 @@ void Face::add(unsigned int v) {
     _v = newV;
 }
 
-ThreeD::ThreeD(const char* filename) :_sizeCoord(0), _sizeFace(0) {
+ThreeD::ThreeD(const char* filename) :_sizeCoord(0), _sizeFace(0), _sizeNorm(0) {
     char ch[100];
     std::ifstream fin(filename);
     if (!fin)
@@ -40,6 +42,16 @@ ThreeD::ThreeD(const char* filename) :_sizeCoord(0), _sizeFace(0) {
             if (!_coord)
                 delete[] _coord;
             _coord = newCoord;
+        }
+        if (ch[0] == 'v' && ch[1] == 'n')
+        {
+            Norm* newNorm = new Norm[++_sizeNorm];
+            fin >> newNorm[_sizeNorm - 1]._x >> newNorm[_sizeNorm - 1]._y >> newNorm[_sizeNorm - 1]._z;
+            for (int i = 0; i < _sizeNorm - 1; ++i)
+                newNorm[i] = _norm[i];
+            if (!_norm)
+                delete[] _norm;
+            _norm = newNorm;
         }
         else if (ch[0] == 'f' && ch[1] == '\0')
         {
@@ -100,9 +112,9 @@ double min_elem(double* x, int size) {
 
 void ThreeD::triangle(Face face, Image& image, Color3 color, double cof, double offsetX, double offsetY, double* z_buf) {
     //int ch = (face._v[3] == 0 ? 1 : 0);
-    double* x = new double[5];
-    double* y = new double[5];
-    double* z = new double[5];
+    double* x = new double[face.size];
+    double* y = new double[face.size];
+    double* z = new double[face.size];
     for (int i = 0; i < face.size; i++)
     {
         x[i] = _coord[face._v[i] - 1]._x;
@@ -128,7 +140,7 @@ void ThreeD::triangle(Face face, Image& image, Color3 color, double cof, double 
 
     color.intensity(-s);
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < face.size; i++)
     {
         x[i] = cof * x[i] + offsetX;
         y[i] = cof * y[i] + offsetY;
@@ -158,6 +170,7 @@ void ThreeD::triangle(Face face, Image& image, Color3 color, double cof, double 
                 z0 *= z[k] * lambda[k];
             }
             if (l) {
+                //z0 = z[0] * lambda[0] + z[1] * lambda[1] + z[2] * lambda[2];
                 if (z0 < z_buf[image.width() * i + j]) {
                     image.set(i, j, color);
                     z_buf[image.width() * i + j] = z0;

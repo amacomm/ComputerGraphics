@@ -8,6 +8,13 @@ public:
     ~Coord() {};
 };
 
+class Norm {
+public:
+    double _x, _y, _z;
+    Norm(double x, double y, double z);
+    ~Norm() {};
+};
+
 class Face {
 public:
     unsigned int* _v;
@@ -24,8 +31,10 @@ class ThreeD {
 public:
     int _sizeCoord;
     int _sizeFace;
+    int _sizeNorm;
     Coord* _coord;
     Face* _face;
+    Norm* _norm;
 
     ThreeD(const char* filename);
     ~ThreeD();
