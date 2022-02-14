@@ -103,15 +103,16 @@ int main() {
     //triangle(-10,  500-150, 500, 500+150, 1500,500, h, w, im, col);
     //im.save((char*)"triangle3.bmp");
 
-    //ThreeD obj((char*)"StormTrooper.obj");
-    ThreeD obj((char*)"deer.obj");
+    ThreeD obj((char*)"StormTrooper.obj");
+    //ThreeD* obj=new ThreeD((char*)"deer.obj");
     int h = 1000, w = 1000;
     Color3 col(255, 165, 0);
     Image im(h, w);
-    //obj.provSet(im, col, 0.5, 500., 0.);
-    obj.polSet(im, col, 0.5, 500,10);
+    //obj.provSet(im, col, 150, 500., 500.);
+    obj.polSet(im, col, 150, 500,500);
     //im.save((char*)"pol6.bmp");
     im.show();
+    //delete obj;
 }
 
 /*int main()

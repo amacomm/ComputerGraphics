@@ -119,10 +119,14 @@ void ThreeD::triangle(Face face, Image& image, Color3 color, double cof, double 
     double lengthL = std::sqrt(std::pow(l[0], 2) + std::pow(l[1], 2) + std::pow(l[2], 2));
     double s = n[0] * l[0] + n[1] * l[1] + n[2] *l[2];
     s /= length * lengthL;
-    if (s >= 0)
+    if (s >= 0) {
+        delete[] x;
+        delete[] y;
+        delete[] z;
         return;
+    }
 
-    color.intensity(s);
+    color.intensity(-s);
 
     for (int i = 0; i < 4; i++)
     {

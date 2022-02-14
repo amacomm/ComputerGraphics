@@ -14,6 +14,7 @@ public:
     int size;
     Face();
     ~Face() {
+        if(!_v)
         delete[] _v;
     }
     void add(unsigned int v);
