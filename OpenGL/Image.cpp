@@ -7,6 +7,12 @@
 Color3::Color3(int r = 0, int g = 0, int b = 0) :
     _r(r), _g(g), _b(b) {};
 
+void Color3::intensity(double proc) {
+    _r *= proc;
+    _g *= proc;
+    _b *= proc;
+}
+
 Image::Image(int width, int height) :
     _width(width), _height(height), _image(new unsigned char[_height * _width * 3]) {
     for (int i = 0; i < _height * _width * 3; _image[i++] = (unsigned char)0);
@@ -93,10 +99,6 @@ void Image::show() {
     HWND myconsole = GetConsoleWindow();
     //Get a handle to device context
     HDC mydc = GetDC(myconsole);
-
-    //Choose any color
-    //COLORREF COLOR;
-    //Draw pixels
 
 //#pragma omp parallel for 
     for (int i = 0; i < _width; i++)

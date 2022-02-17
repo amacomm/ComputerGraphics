@@ -1,4 +1,5 @@
 #include "BMP.h"
+#include <fstream>
 
 void BMP1_save(unsigned char* image, int height, int width, char* imageFileName, char** colore, int colore_size)
 {
@@ -172,21 +173,39 @@ void BMP24_save(unsigned char* image, int height, int width, char* imageFileName
 
     int stride = (widthInBytes)+paddingSize;
 
-    FILE* imageFile = fopen(imageFileName, "wb");
+    std::ofstream fout(imageFileName, std::ios::binary);
+    //FILE* imageFile = fopen(imageFileName, "wb");
 
     unsigned char* fileHeader = BMP24_Header(height, stride);
-    fwrite(fileHeader, 1, FILE_HEADER_SIZE, imageFile);
+    for (int i = 0; i < FILE_HEADER_SIZE; i++)
+    {
+        fout << fileHeader[i];
+    }
+    //fwrite(fileHeader, 1, FILE_HEADER_SIZE, imageFile);
 
     unsigned char* infoHeader = BMP24_info(height, width);
-    fwrite(infoHeader, 1, INFO_HEADER_SIZE, imageFile);
+    for (int i = 0; i <INFO_HEADER_SIZE; i++)
+    {
+        fout << infoHeader[i];
+    }
+    //fwrite(infoHeader, 1, INFO_HEADER_SIZE, imageFile);
 
     int i;
     for (i = 0; i < height; i++) {
-        fwrite(image + (i * widthInBytes), 3, width, imageFile);
-        fwrite(padding, 1, paddingSize, imageFile);
+        for (int k = 0; k < 3; k++)
+            for (int j = 0; j < width; j++)
+            {
+                fout << image[(i * widthInBytes+j)+width*k];
+            }
+        for (int j = 0; j < paddingSize; j++)
+        {
+            fout << padding[j];
+        }
+        //fwrite(image + (i * widthInBytes), 3, width, imageFile);
+        //fwrite(padding, 1, paddingSize, imageFile);
     }
-
-    fclose(imageFile);
+    fout.close();
+    //fclose(imageFile);
 }
 
 unsigned char* BMP24_Header(int height, int stride)

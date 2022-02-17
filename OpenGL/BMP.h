@@ -11,9 +11,9 @@ unsigned char* BMP24_Header(int height, int stride);
 unsigned char* BMP24_info(int height, int width);
 
 
-void BMP1_save(unsigned char* image, int height, int width, char* imageFileName, char** colore, int colore_size=2);
+void BMP1_save(unsigned char* image, int height, int width, char* imageFileName, char** colore, int colore_size = 2);
 
-void BMP8_save(char* image, int height, int width, char* imageFileName, char** colore, int colore_size);
+void BMP8_save(char* image, int height, int width, char* imageFileName, char** colore , int colore_size = 256);
 
 void BMP24_save(unsigned char* image, int height, int width, char* imageFileName);
 

@@ -8,25 +8,42 @@ public:
     ~Coord() {};
 };
 
+class Norm {
+public:
+    double _x, _y, _z;
+    Norm(double x, double y, double z);
+    ~Norm() {};
+};
+
 class Face {
 public:
-    unsigned int _v[4];
-    Face(unsigned int v1, unsigned int v2, unsigned int v3, unsigned int v4);
-    ~Face() {};
+    unsigned int* _v;
+    unsigned int* _vn;
+    int size;
+    Face();
+    ~Face() {
+        if(!_v)
+            delete[] _v;
+        if (!_vn)
+            delete[] _vn;
+    }
+    void add(unsigned int v, unsigned int vn);
 };
 
 class ThreeD {
 public:
     int _sizeCoord;
     int _sizeFace;
+    int _sizeNorm;
     Coord* _coord;
     Face* _face;
+    Norm* _norm;
 
     ThreeD(const char* filename);
     ~ThreeD();
 
     void provSet(Image& image, Color3 color, double cof, double offsetX, double offsetY, double fi=0.0, double psi=0., double nu=0.);
     void polSet(Image& image, Color3 color, double cof, double offsetX, double offsetY, double fi=0, double psi=0, double nu=0);
-    void triangle(Face face, Image& image, Color3 color, double cof, double offsetX, double offsetY, double* z_buf);
+    void triangle(Face face, Image& image, Color3 color, double cof, double offsetX, double offsetY, int* z_buf, double fi=0);
 
 };
