@@ -100,10 +100,6 @@ void Image::show() {
     //Get a handle to device context
     HDC mydc = GetDC(myconsole);
 
-    //Choose any color
-    //COLORREF COLOR;
-    //Draw pixels
-
 //#pragma omp parallel for 
     for (int i = 0; i < _width; i++)
     {

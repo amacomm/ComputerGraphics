@@ -18,13 +18,16 @@ public:
 class Face {
 public:
     unsigned int* _v;
+    unsigned int* _vn;
     int size;
     Face();
     ~Face() {
         if(!_v)
-        delete[] _v;
+            delete[] _v;
+        if (!_vn)
+            delete[] _vn;
     }
-    void add(unsigned int v);
+    void add(unsigned int v, unsigned int vn);
 };
 
 class ThreeD {
