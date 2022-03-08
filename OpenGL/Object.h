@@ -3,8 +3,8 @@
 
 class Coord {
 public:
-    double _x, _y, _z;
-    Coord(double x, double y, double z);
+    float _x, _y, _z;
+    Coord(float x, float y, float z);
     ~Coord() {};
 };
 
@@ -18,16 +18,21 @@ public:
 class Face {
 public:
     unsigned int* _v;
-    unsigned int* _vn;
+    //unsigned int* _vn;
     int size;
+
     Face();
     ~Face() {
-        if(!_v)
-            delete[] _v;
-        if (!_vn)
-            delete[] _vn;
+
     }
-    void add(unsigned int v, unsigned int vn);
+    void clear() {
+        if (_v)
+            delete _v;
+        //if (_vn)
+        //    delete _vn;
+    }
+    void add(unsigned int v);
+    //void add(unsigned int v, unsigned int vn);
 };
 
 class ThreeD {
@@ -39,7 +44,7 @@ public:
     Face* _face;
     Norm* _norm;
 
-    ThreeD(const char* filename);
+    ThreeD(const char* filename, Image &im);
     ~ThreeD();
 
     void provSet(Image& image, Color3 color, double cof, double offsetX, double offsetY, double fi=0.0, double psi=0., double nu=0.);
