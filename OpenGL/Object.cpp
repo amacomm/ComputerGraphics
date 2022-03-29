@@ -5,7 +5,8 @@
 #include <ctime>
 #include <algorithm>
 
-Coord::Coord(float x = 0, float y = 0, float z = 0) :_x(x), _y(y), _z(z) {};
+Coord::Coord(float x , float y, float z) :_x(x), _y(y), _z(z) {};
+//Coord::Coord() :_x(0), _y(0), _z(0) {};
 
 Norm::Norm(double x = 0, double y = 0, double z = 0) :_x(x), _y(y), _z(z) {};
 
@@ -111,6 +112,9 @@ ThreeD::ThreeD(const char* filename) :_sizeCoord(0), _sizeFace(0), _sizeNorm(0) 
         }
     }
 }
+ThreeD::ThreeD() {
+
+}
 
 ThreeD::~ThreeD() {
     delete[] _coord;
@@ -119,13 +123,12 @@ ThreeD::~ThreeD() {
     delete[] _face;
 }
 
-void ThreeD::provSet(Image& image, Color3 color, double cof, double offsetX, double offsetY, double fi, double psi, double nu) {
+void ThreeD::provSet(Image& image, Color3 color) {
     for (int i = 0; i < _sizeFace; i++)
     {
         Face face(_face[i]);
         for (int j = 0; j < face.size; j++)
-            image.line(cof * ((_coord[face._v[j] - 1]._x* cos(fi) + _coord[face._v[j] - 1]._z* sin(fi))*cos(psi)+sin(-psi)* (_coord[face._v[j] - 1]._y * cos(nu) + _coord[face._v[j] - 1]._z * sin(nu))) + offsetX, cof * ((_coord[face._v[j] - 1]._y * cos(nu) + _coord[face._v[j] - 1]._z * sin(nu)) * cos(psi) + sin(psi)* (_coord[face._v[j] - 1]._x * cos(fi) + _coord[face._v[j] - 1]._z * sin(fi))) + offsetY,
-            cof *(( _coord[face._v[(j + 1) % face.size] - 1]._x * cos(fi) + _coord[face._v[(j + 1) % face.size] - 1]._z * sin(fi)) * cos(psi) + sin(-psi)* (_coord[face._v[(j + 1) % face.size] - 1]._y * cos(nu) + _coord[face._v[(j + 1) % face.size] - 1]._z * sin(nu))) + offsetX, cof * ((_coord[face._v[(j + 1) % face.size] - 1]._y * cos(nu) + _coord[face._v[(j + 1) % face.size] - 1]._z * sin(nu)) * cos(psi) + sin(psi)* (_coord[face._v[(j + 1) % face.size] - 1]._x * cos(fi) + _coord[face._v[(j + 1) % face.size] - 1]._z * sin(fi))) + offsetY, color);
+            image.line(_coord[face._v[j] - 1]._x, _coord[face._v[j] - 1]._y, _coord[face._v[(j + 1) % face.size] - 1]._x, _coord[face._v[(j + 1) % face.size] - 1]._y, color);
     }
 }
 
@@ -145,7 +148,7 @@ double min_elem(double* x, int size) {
     return min;
 }
 
-void ThreeD::triangle(Face face, Image& image, Color3 color, int* z_buf) {
+void ThreeD::triangle(Face face, Image& image, Color3 color, Zbuff& z_buf) {
     double* x = new double[face.size];
     double* y = new double[face.size];
     double* z = new double[face.size];
@@ -165,15 +168,14 @@ void ThreeD::triangle(Face face, Image& image, Color3 color, int* z_buf) {
     double lengthL = std::sqrt(std::pow(l[0], 2) + std::pow(l[1], 2) + std::pow(l[2], 2));
     double s = n[0] * l[0] + n[1] * l[1] + n[2] *l[2];
     s /= length * lengthL;
-    //if (face.size > 4)s = -std::abs(s);
-    if (s >= 0) {
+    if (s <= 0) {
         delete[] x;
         delete[] y;
         delete[] z;
         return;
     }
     
-    color.intensity(-s);
+    color.intensity(s);
 
     double xmin = min_elem(x, face.size);
     double ymin = min_elem(y, face.size);
@@ -184,40 +186,31 @@ void ThreeD::triangle(Face face, Image& image, Color3 color, int* z_buf) {
     ymin = ymin > 0 ? ymin : 0;
     xmax = xmax < image.width() ? xmax : image.width();
     ymax = ymax < image.height() ? ymax : image.height();
-    double* lambda = new double[3];
+    double lambda[3];
     for (int i = xmin; i < xmax; i++)
         for (int j = ymin; j < ymax; j++)
             for (int t = 0; t < face.size-2; t++)
             {
                 int km[3]{ 0, 1+t, 2+t };
-                int z0 = 0;
+                double z0 = 0;
                 bool l = true;
                 for (int k = 0; k < 3; k++)
                 {
                     int k1 = km[k % 3], k2 = km[(k + 1) % 3], k0 = km[(k - 1) % 3 < 0 ? (k - 1) % 3 + 3 : (k - 1) % 3];
                     lambda[k] = ((x[k1] - x[k2]) * (j - y[k2]) - (y[k1] - y[k2]) * (i - x[k2])) / ((x[k1] - x[k2]) * (y[k0] - y[k2]) - (y[k1] - y[k2]) * (x[k0] - x[k2]));
                     l = l && (lambda[k] > 0);
-                    z0 += z[k] * lambda[k];
+                    z0 += z[k1] * lambda[k];
                 }
-                if (l&& z0 > z_buf[image.width() * i + j]) {
-                        image.set(i, j, color);
-                        z_buf[image.width() * i + j] = z0;
-                }
+                if (l&& z_buf.ifSet(z0, i, j))
+                    image.set(i, j, color);
             }
     delete[] x;
     delete[] y;
     delete[] z;
-    delete[] lambda;
 }
 
 void ThreeD::polSet(Image& image, Color3 color) {
-    std::srand(std::time(nullptr));
-    int* z_buf = new int[image.width() * image.height()];
-    for (int i = 0; i < image.width() * image.height(); z_buf[i++] =-2000000000);
+    Zbuff zbuff(image.height(), image.width());
     for (int i = 0; i < _sizeFace; i++)
-    {
-        //Color3 c(std::rand()%256, std::rand() % 256, std::rand() % 256);
-        triangle(_face[i], image, color, z_buf);
-    }
-    delete[] z_buf;
+        triangle(_face[i], image, color, zbuff);
 }
