@@ -31,15 +31,15 @@ void Face::add(unsigned int v) {
     //_vn = newVn;
 }
 
-ThreeD::ThreeD(const char* filename, Image& image) :_sizeCoord(0), _sizeFace(0), _sizeNorm(0) {
+ThreeD::ThreeD(const char* filename) :_sizeCoord(0), _sizeFace(0), _sizeNorm(0) {
     char ch[100];
     std::ifstream fin(filename);
     if (!fin)
         return;
     int chislo = 0;
-    int* z_buf = new int[image.width() * image.height()];
-    for (int i = 0; i < image.width() * image.height(); z_buf[i++] = -2000000000);
-    Color3 c(255, 255, 255);
+    //int* z_buf = new int[image.width() * image.height()];
+    //for (int i = 0; i < image.width() * image.height(); z_buf[i++] = -2000000000);
+    //Color3 c(255, 255, 255);
     while (!fin.eof())
     {
         fin >> ch;
@@ -145,15 +145,15 @@ double min_elem(double* x, int size) {
     return min;
 }
 
-void ThreeD::triangle(Face face, Image& image, Color3 color, double cof, double offsetX, double offsetY, int* z_buf, double fi) {
+void ThreeD::triangle(Face face, Image& image, Color3 color, int* z_buf) {
     double* x = new double[face.size];
     double* y = new double[face.size];
     double* z = new double[face.size];
     for (int i = 0; i < face.size; i++)
     {
-        x[i] = cof * (_coord[face._v[i] - 1]._x * cos(fi) + _coord[face._v[i] - 1]._z * sin(fi)) + offsetX;
-        y[i] = cof * _coord[face._v[i] - 1]._y + offsetY;
-        z[i] = cof * (_coord[face._v[i] - 1]._z * cos(fi) + _coord[face._v[i] - 1]._x * sin(fi)) + offsetX;
+        x[i] = _coord[face._v[i] - 1]._x;
+        y[i] = _coord[face._v[i] - 1]._y;
+        z[i] = _coord[face._v[i] - 1]._z;
     }
 
     double n1[3] = { x[1] - x[0],y[1] - y[0], z[1] - z[0] };
@@ -210,14 +210,14 @@ void ThreeD::triangle(Face face, Image& image, Color3 color, double cof, double 
     delete[] lambda;
 }
 
-void ThreeD::polSet(Image& image, Color3 color, double cof, double offsetX, double offsetY, double fi, double psi, double nu) {
+void ThreeD::polSet(Image& image, Color3 color) {
     std::srand(std::time(nullptr));
     int* z_buf = new int[image.width() * image.height()];
     for (int i = 0; i < image.width() * image.height(); z_buf[i++] =-2000000000);
     for (int i = 0; i < _sizeFace; i++)
     {
         //Color3 c(std::rand()%256, std::rand() % 256, std::rand() % 256);
-        triangle(_face[i], image, color, cof, offsetX, offsetY, z_buf, fi);
+        triangle(_face[i], image, color, z_buf);
     }
     delete[] z_buf;
 }
