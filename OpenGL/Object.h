@@ -62,6 +62,7 @@ public:
     int _sizeCoord;
     int _sizeFace;
     int _sizeNorm;
+    double x_max, y_max, z_max;
     Coord* _coord;
     Face* _face;
     Norm* _norm;
@@ -79,7 +80,7 @@ public:
 
             _coord[i]._x = (_coord[i]._x * ax) / _coord[i]._z + u0;
             _coord[i]._y = (_coord[i]._y * ay) / _coord[i]._z + v0;
-           // _coord[i]._z = (zf / (zf - zn)) * (1 - zn / _coord[i]._z);
+            _coord[i]._z = (zf / (zf - zn)) * (1 - zn / _coord[i]._z);
         }
     }
     void toOrdinary(double ax, double ay, double az, int u0, int v0) {
@@ -104,6 +105,19 @@ public:
             _coord[i]._x = cos(c)*cos(b)* _coord[i]._x+sin(c)*cos(b)* _coord[i]._y+sin(b)* _coord[i]._z;
             _coord[i]._y = (-sin(a)*sin(b)*cos(c)-sin(c)*cos(a))* _coord[i]._x+(-sin(a)*sin(b)*sin(c)+cos(a)*cos(c))* _coord[i]._y+sin(a)*cos(b)* _coord[i]._z;
             _coord[i]._z = (sin(a)*sin(c)-sin(b)*cos(c)*cos(a))* _coord[i]._x+(-sin(b)*cos(a)*sin(c)-sin(a)*cos(c))* _coord[i]._y+cos(a)*cos(b)* _coord[i]._z;
+        }
+    }
+    void Norm() {
+        x_max = y_max = z_max = 0;
+        for (int i = 0; i < _sizeCoord; ++i) {
+            x_max = abs(_coord[i]._x) > x_max ? abs(_coord[i]._x) : x_max;
+            y_max = abs(_coord[i]._y) > y_max ? abs(_coord[i]._y) : y_max;
+            z_max = abs(_coord[i]._z) > z_max ? abs(_coord[i]._z) : z_max;
+        }
+        for (int i = 0; i < _sizeCoord; ++i) {
+            _coord[i]._x /= x_max;
+            _coord[i]._y /= y_max;
+            _coord[i]._z /= z_max;
         }
     }
 };

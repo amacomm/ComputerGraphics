@@ -8,10 +8,13 @@ int main() {
     //ThreeD obj((char*)"car.obj", im);
     //ThreeD obj((char*)"StormTrooper.obj");
     ThreeD obj((char*)"deer.obj");
-    obj.toOrdinary(0.5, 0.5, 0.5, 0, 0);
+    obj.Norm();
+    //obj.toOrdinary(900, 900, 900, 0, 0);
     obj.toTurn(0, 3.14 / 4, 0);
-    obj.MoveTo(0, 0, 1300);
-    obj.toPerspectiv(700,700, 500, 0);
+    obj.MoveTo(0, 0, 3);
+    obj.toPerspectiv(500,500, 500, 0);
+    obj.Norm();
+    obj.toOrdinary(1000, 1000, 1000, 0, 0);
     //obj.provSet(im, col);
 
     obj.polSet(im, col);

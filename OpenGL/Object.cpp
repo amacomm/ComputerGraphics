@@ -32,7 +32,7 @@ void Face::add(unsigned int v) {
     //_vn = newVn;
 }
 
-ThreeD::ThreeD(const char* filename) :_sizeCoord(0), _sizeFace(0), _sizeNorm(0) {
+ThreeD::ThreeD(const char* filename) :_sizeCoord(0), _sizeFace(0), _sizeNorm(0), x_max(0), y_max(0), z_max(0) {
     char ch[100];
     std::ifstream fin(filename);
     if (!fin)
@@ -48,6 +48,9 @@ ThreeD::ThreeD(const char* filename) :_sizeCoord(0), _sizeFace(0), _sizeNorm(0) 
         {
             Coord* newCoord = new Coord[++_sizeCoord];
             fin >> newCoord[_sizeCoord - 1]._x >> newCoord[_sizeCoord - 1]._y >> newCoord[_sizeCoord - 1]._z;
+            x_max = abs(newCoord[_sizeCoord - 1]._x) > x_max ? abs(newCoord[_sizeCoord - 1]._x) : x_max;
+            y_max = abs(newCoord[_sizeCoord - 1]._y) > x_max ? abs(newCoord[_sizeCoord - 1]._y) : y_max;
+            z_max = abs(newCoord[_sizeCoord - 1]._z) > z_max ? abs(newCoord[_sizeCoord - 1]._z) : z_max;
             for (int i = 0; i < _sizeCoord - 1; ++i)
                 newCoord[i] = _coord[i];
             if (_coord)
@@ -66,30 +69,6 @@ ThreeD::ThreeD(const char* filename) :_sizeCoord(0), _sizeFace(0), _sizeNorm(0) 
         //}
         else if (ch[0] == 'f' && ch[1] == '\0')
         {
-            //Face newFace;
-            //std::string str;
-            //getline(fin, str);
-            //std::istringstream iss(str);
-            //while (!iss.eof()) {
-            //    int integer1, integer2, integer3;
-            //    std::string s;
-            //    iss >> s;
-            //    if (s == "")
-            //        continue;
-            //    sscanf(s.c_str(), "%i/%i/%i", &integer1, &integer2, &integer3);
-            //    newFace.add(integer1, integer3);
-            //}
-            //double cof = 20;
-            //double fi = 3.14 / 4;
-            //double psi = 0;
-            //double nu = -3.14 / 8;
-            //double offsetX = 500; 
-            //double offsetY = 500;
-            ////for (int j = 0; j < newFace.size; j++)
-            ////image.line(cof * ((_coord[newFace._v[j] - 1]._x * cos(fi) + _coord[newFace._v[j] - 1]._z * sin(fi)) * cos(psi) + sin(-psi) * (_coord[newFace._v[j] - 1]._y * cos(nu) + _coord[newFace._v[j] - 1]._z * sin(nu))) + offsetX, cof * ((_coord[newFace._v[j] - 1]._y * cos(nu) + _coord[newFace._v[j] - 1]._z * sin(nu)) * cos(psi) + sin(psi) * (_coord[newFace._v[j] - 1]._x * cos(fi) + _coord[newFace._v[j] - 1]._z * sin(fi))) + offsetY,
-            ////    cof * ((_coord[newFace._v[(j + 1) % newFace.size] - 1]._x * cos(fi) + _coord[newFace._v[(j + 1) % newFace.size] - 1]._z * sin(fi)) * cos(psi) + sin(-psi) * (_coord[newFace._v[(j + 1) % newFace.size] - 1]._y * cos(nu) + _coord[newFace._v[(j + 1) % newFace.size] - 1]._z * sin(nu))) + offsetX, cof * ((_coord[newFace._v[(j + 1) % newFace.size] - 1]._y * cos(nu) + _coord[newFace._v[(j + 1) % newFace.size] - 1]._z * sin(nu)) * cos(psi) + sin(psi) * (_coord[newFace._v[(j + 1) % newFace.size] - 1]._x * cos(fi) + _coord[newFace._v[(j + 1) % newFace.size] - 1]._z * sin(fi))) + offsetY, c);
-            //triangle(newFace, image, c , 20, 500, 500, z_buf, 3.14/2);
-            
             Face* newFace = new Face[++_sizeFace];
             std::string str;
             getline(fin, str);
