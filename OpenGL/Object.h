@@ -13,8 +13,19 @@ public:
 class Norm {
 public:
     double _x, _y, _z;
-    Norm(double x, double y, double z);
+    Norm(double x=0, double y=0, double z=0);
     ~Norm() {};
+    void Normalize(Norm n) {
+        double length1 = std::sqrt(std::pow(n._x, 2) + std::pow(n._y, 2) + std::pow(n._z, 2));
+        double length2 = std::sqrt(std::pow(_x, 2) + std::pow(_y, 2) + std::pow(_z, 2));
+        double ccos = n._x * _x + n._y * _y + n._z * _z;
+        ccos /= length1 * length2>0? length2:1;
+        double  x= std::sqrt(std::pow(n._x, 2) + std::pow(_x, 2) + 2 * abs(n._x) * abs(_x) * ccos),
+                y= std::sqrt(std::pow(n._y, 2) + std::pow(_y, 2) + 2 * abs(n._y) * abs(_y) * ccos),
+                z= std::sqrt(std::pow(n._z, 2) + std::pow(_z, 2) + 2 * abs(n._z) * abs(_z) * ccos);
+        double length = std::sqrt(std::pow(x, 2) + std::pow(y, 2) + std::pow(z, 2));
+        _x=x / length; _y=y / length; _z= z / length;
+    }
 };
 
 class Face {
@@ -36,26 +47,28 @@ public:
     void add(unsigned int v);
     //void add(unsigned int v, unsigned int vn);
 };
-class Zbuff {
-public:
 
-    double* z_buf;
-    int width, height;
-    Zbuff(int height, int width):height(height), width(width){
-        z_buf = new double[height * width];
-        for (int i = 0; i < width * height; z_buf[i++] = 200000000);
+class Triangle {
+public:
+    Coord *_coord1, *_coord2, *_coord3;
+    Norm _norm1, _norm2, _norm3;
+    Triangle() {}
+    Triangle(Coord *coord1 , Coord *coord2 , Coord *coord3 /*, Norm norm1, Norm norm2, Norm norm3*/) : _coord1(coord1), _coord2(coord2), _coord3(coord3), _norm1(Norm()), _norm2(Norm()), _norm3(Norm()) {
+        this->PoligonNorm();
     }
-    ~Zbuff() {
-        delete[] z_buf;
-    }
-    bool ifSet(double z, int i, int j) {
-        if (z <= z_buf[width * i + j]) {
-            z_buf[width * i + j] = z;
-            return true;
-        }
-        return false;
+    ~Triangle() {}
+    void PoligonNorm() {
+        double n1[3] = { _coord2->_x - _coord1->_x, _coord2->_y - _coord1->_y, _coord2->_z - _coord1->_z };
+        double n2[3] = { _coord2->_x - _coord3->_x, _coord2->_y - _coord3->_y, _coord2->_z - _coord3->_z };
+        double n[3] = { n1[1] * n2[2] - n1[2] * n2[1], n1[0] * n2[2] - n1[2] * n2[0] ,n1[0] * n2[1] - n1[1] * n2[0] };
+        double length = std::sqrt(std::pow(n[0], 2) + std::pow(n[1], 2) + std::pow(n[2], 2));
+        n[0] /= length; n[1] /= length; n[2] /= length;
+        _norm1._x = n[0]; _norm1._y = n[1]; _norm1._z = n[2];
+        _norm2._x = n[0]; _norm2._y = n[1]; _norm2._z = n[2];
+        _norm3._x = n[0]; _norm3._y = n[1]; _norm3._z = n[2];
     }
 };
+
 
 class ThreeD {
 public:
@@ -66,6 +79,7 @@ public:
     Coord* _coord;
     Face* _face;
     Norm* _norm;
+    Triangle* _tri;
 
     ThreeD(const char* filename);
     ThreeD();
@@ -73,7 +87,8 @@ public:
 
     void provSet(Image& image, Color3 color);
     void polSet(Image& image, Color3 color);
-    void triangle(Face face, Image& image, Color3 color, Zbuff& z_buf);
+    void triangle(Triangle tri, Image& image, Color3 color);
+    //void triangle(Face face, Image& image, Color3 color);
     void toPerspectiv(double ax, double ay, int u0, int v0) {
         double zn = 1, zf =100;
         for (int i = 0; i < _sizeCoord; ++i) {
@@ -118,6 +133,45 @@ public:
             _coord[i]._x /= x_max;
             _coord[i]._y /= y_max;
             _coord[i]._z /= z_max;
+        }
+    }
+    void PreNorm() {
+        for (int i = 0; i < _sizeFace; ++i) {
+            _tri[i].PoligonNorm();
+        }
+    }
+    void Smooth() {
+        for (int i = 0; i < _sizeCoord; i++){
+            ::Norm n = ::Norm();
+            for (int j = 0; j < _sizeFace; ++j) {
+                if (_tri[j]._coord1==&_coord[i])
+                {
+                    n.Normalize(_tri[j]._norm1);
+                }
+                else if (_tri[j]._coord2 == &_coord[i])
+                {
+                    n.Normalize(_tri[j]._norm2);
+                }
+                else if (_tri[j]._coord3 == &_coord[i])
+                {
+                    n.Normalize(_tri[j]._norm3);
+                }
+            }
+            for (int j = 0; j < _sizeFace; ++j) {
+                if (_tri[j]._coord1 == &_coord[i])
+                {
+                    _tri[j]._norm1 = n;
+                }
+                else if (_tri[j]._coord2 == &_coord[i])
+                {
+                    _tri[j]._norm2 = n;
+                }
+                else if (_tri[j]._coord3 == &_coord[i])
+                {
+                    _tri[j]._norm3 = n;
+
+                }
+            }
         }
     }
 };

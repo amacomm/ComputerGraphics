@@ -5,7 +5,28 @@ public:
     int _r, _g, _b;
     Color3(int r, int g, int b);
     ~Color3() {};
-    void intensity(double proc);
+    Color3 intensity(double proc);
+};
+
+class Zbuff {
+public:
+
+    double* z_buf;
+    int width, height;
+    Zbuff(int height, int width) :height(height), width(width) {
+        z_buf = new double[height * width];
+        for (int i = 0; i < width * height; z_buf[i++] = 200000000);
+    }
+    ~Zbuff() {
+        delete[] z_buf;
+    }
+    bool ifSet(double z, int i, int j) {
+        if (z <= z_buf[width * i + j]) {
+            z_buf[width * i + j] = z;
+            return true;
+        }
+        return false;
+    }
 };
 
 class Image {
@@ -15,6 +36,7 @@ private:
     unsigned char* _image;
 
 public:
+    Zbuff z_buff;
     Image(int width, int height);
     int width() const;
     int height() const;
