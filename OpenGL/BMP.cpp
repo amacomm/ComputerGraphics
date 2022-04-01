@@ -24,7 +24,6 @@ void BMP1_save(unsigned char* image, int height, int width, char* imageFileName,
 
     fclose(imageFile);
 }
-
 unsigned char* BMP1_Header(int height, int stride)
 {
     int fileSize = FILE_HEADER_SIZE + INFO_HEADER_SIZE + (stride * height);
@@ -47,7 +46,6 @@ unsigned char* BMP1_Header(int height, int stride)
 
     return fileHeader;
 }
-
 unsigned char* BMP1_info(int height, int width)
 {
     static unsigned char infoHeader[] = {
@@ -79,7 +77,6 @@ unsigned char* BMP1_info(int height, int width)
 
     return infoHeader;
 }
-
 void BMP8_save(char* image, int height, int width, char* imageFileName, char** colore, int colore_size)
 {
     int widthInBytes = width * 8;
@@ -104,7 +101,6 @@ void BMP8_save(char* image, int height, int width, char* imageFileName, char** c
 
     fclose(imageFile);
 }
-
 unsigned char* BMP8_Header(int height, int stride, int colore_size)
 {
     int fileSize = FILE_HEADER_SIZE + INFO_HEADER_SIZE + (stride * height);
@@ -129,7 +125,6 @@ unsigned char* BMP8_Header(int height, int stride, int colore_size)
 
     return fileHeader;
 }
-
 unsigned char* BMP8_info(int height, int width, int colore_size)
 {
     static unsigned char infoHeader[] = {
@@ -163,7 +158,6 @@ unsigned char* BMP8_info(int height, int width, int colore_size)
 
     return infoHeader;
 }
-
 void BMP24_save(unsigned char* image, int height, int width, char* imageFileName)
 {
     int widthInBytes = width * 3;
@@ -207,7 +201,6 @@ void BMP24_save(unsigned char* image, int height, int width, char* imageFileName
     fout.close();
     //fclose(imageFile);
 }
-
 unsigned char* BMP24_Header(int height, int stride)
 {
     int fileSize = FILE_HEADER_SIZE + INFO_HEADER_SIZE + (stride * height);
@@ -229,7 +222,6 @@ unsigned char* BMP24_Header(int height, int stride)
 
     return fileHeader;
 }
-
 unsigned char* BMP24_info(int height, int width)
 {
     static unsigned char infoHeader[] = {
@@ -259,4 +251,60 @@ unsigned char* BMP24_info(int height, int width)
     infoHeader[14] = (unsigned char)(3 * 8);
 
     return infoHeader;
+}
+unsigned char* BMP24_read(int& height, int& width, char* imageFileName) {
+    std::ifstream fin(imageFileName, std::ios::binary);
+    char ch;
+    static unsigned char fileHeader[] = {
+        0,0,     /// signature
+        0,0,0,0, /// image file size in bytes
+        0,0,0,0, /// reserved
+        0,0,0,0, /// start of pixel array
+    };
+    int i = 0;
+    while (fin.get(ch))
+    {
+        fileHeader[i++]=(unsigned char)ch;
+        if (i > FILE_HEADER_SIZE-1) break;
+    }
+    static unsigned char infoHeader[] = {
+        0,0,0,0, /// header size
+        0,0,0,0, /// image width
+        0,0,0,0, /// image height
+        0,0,     /// number of color planes
+        0,0,     /// bits per pixel
+        0,0,0,0, /// compression
+        0,0,0,0, /// image size
+        0,0,0,0, /// horizontal resolution
+        0,0,0,0, /// vertical resolution
+        0,0,0,0, /// colors in color table
+        0,0,0,0, /// important color count
+    };
+    i = 0;
+    while (fin.get(ch))
+    {
+        infoHeader[i++] = (unsigned char)ch;
+        if (i > INFO_HEADER_SIZE-1) break;
+    }
+    width = (int)infoHeader[4] + ((int)infoHeader[5] << 8) + ((int)infoHeader[6] << 16) + ((int)infoHeader[7] << 24);
+    height = (int)infoHeader[8] + ((int)infoHeader[9]<<8) + ((int)infoHeader[10]<<16) + ((int)infoHeader[11]<<24);
+    unsigned char* image = new unsigned char[width * height*3];
+    int widthInBytes = width * 3;
+
+    unsigned char padding[3] = { 0, 0, 0 };
+    int paddingSize = (4 - (widthInBytes) % 4) % 4;
+
+    int stride = (widthInBytes)+paddingSize;
+    for (i = 0; i < height; i++) {
+        for (int k = 0; k < 3; k++)
+            for (int j = 0; j < width; j++)
+            {
+                fin.get(ch);
+                image[(i * widthInBytes + j) + width * k] = ch;
+            }
+        for (int j = 0; j < paddingSize; j++)
+            fin.get(ch);
+    }
+    fin.close();
+    return image;
 }

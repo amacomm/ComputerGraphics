@@ -10,12 +10,10 @@ unsigned char* BMP8_info(int height, int width, int colore_size);
 unsigned char* BMP24_Header(int height, int stride);
 unsigned char* BMP24_info(int height, int width);
 
-
 void BMP1_save(unsigned char* image, int height, int width, char* imageFileName, char** colore, int colore_size = 2);
-
 void BMP8_save(char* image, int height, int width, char* imageFileName, char** colore , int colore_size = 256);
-
 void BMP24_save(unsigned char* image, int height, int width, char* imageFileName);
+unsigned char* BMP24_read(int &height, int &width, char* imageFileName);
 
 /*void gif(char* image, int height, int width, char* imageFileName, char** colore, int colore_size) {
     static unsigned char fileHeader[] = {
