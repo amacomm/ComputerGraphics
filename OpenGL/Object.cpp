@@ -4,81 +4,7 @@
 #include <string>
 #include <algorithm>
 
-Coord::Coord(float x , float y, float z) :_x(x), _y(y), _z(z) {};
-
-TexturaCoord::TexturaCoord(float x, float y) :_x(x), _y(y) {};
-
-Norm::Norm(double x, double y, double z) :_x(x), _y(y), _z(z) {};
-
-Norm Norm::operator+= (Norm const n) {
-    double length1 = std::sqrt(std::pow(n._x, 2) + std::pow(n._y, 2) + std::pow(n._z, 2));
-    double length2 = std::sqrt(std::pow(_x, 2) + std::pow(_y, 2) + std::pow(_z, 2));
-    double ccos = n._x * _x + n._y * _y + n._z * _z;
-    ccos /= length1 * length2 > 0 ? length2 : 1;
-    double  x = std::sqrt(std::pow(n._x, 2) + std::pow(_x, 2) + 2 * abs(n._x) * abs(_x) * ccos),
-        y = std::sqrt(std::pow(n._y, 2) + std::pow(_y, 2) + 2 * abs(n._y) * abs(_y) * ccos),
-        z = std::sqrt(std::pow(n._z, 2) + std::pow(_z, 2) + 2 * abs(n._z) * abs(_z) * ccos);
-    double length = std::sqrt(std::pow(x, 2) + std::pow(y, 2) + std::pow(z, 2));
-    _x = x / length; _y = y / length; _z = z / length;
-    return *this;
-}
-
-Face::Face(){
-    _v = nullptr;
-    _vn = nullptr;
-    _vt = nullptr;
-    size = 0;
-}
-
-void Face::clear() {
-    if (_v)
-        delete _v;
-    if (_vn)
-        delete _vn;
-    if (_vt)
-        delete _vt;
-}
-
-void Face::add(unsigned int v, unsigned int vn, unsigned int vt) {
-    unsigned int* newV = new unsigned int[++size];
-    unsigned int* newVn = new unsigned int[size];
-    unsigned int* newVt = new unsigned int[size];
-    for (int i = 0; i < size - 1; i++) {
-        newV[i] = _v[i];
-        newVn[i] = _vn[i];
-        newVt[i] = _vt[i];
-    }
-    newV[size - 1] = v;
-    newVn[size - 1] = vn;
-    newVt[size - 1] = vt;
-    if (_v) {
-        delete[] _v;
-        delete[] _vn;
-        delete[] _vt;
-    }
-    _v = newV;
-    _vn = newVn;
-    _vt = newVt;
-}
-
-Triangle::Triangle(Coord* coord1, Coord* coord2, Coord* coord3, Norm norm1, Norm norm2, Norm norm3) : _coord1(coord1), _coord2(coord2), _coord3(coord3), _norm1(norm1), _norm2(norm2), _norm3(norm3),
-_tcoord1(TexturaCoord(0.1f, 0.1f)), _tcoord2(TexturaCoord(0.1f, 0.9f)), _tcoord3(TexturaCoord(0.9f, 0.9f))
-{
-    this->PoligonNorm();
-}
-
-void Triangle::PoligonNorm() {
-    double n1[3] = { _coord2->_x - _coord1->_x, _coord2->_y - _coord1->_y, _coord2->_z - _coord1->_z };
-    double n2[3] = { _coord2->_x - _coord3->_x, _coord2->_y - _coord3->_y, _coord2->_z - _coord3->_z };
-    double n[3] = { n1[1] * n2[2] - n1[2] * n2[1], n1[0] * n2[2] - n1[2] * n2[0] ,n1[0] * n2[1] - n1[1] * n2[0] };
-    double length = std::sqrt(std::pow(n[0], 2) + std::pow(n[1], 2) + std::pow(n[2], 2));
-    n[0] /= length; n[1] /= length; n[2] /= length;
-    _norm1._x = n[0]; _norm1._y = n[1]; _norm1._z = n[2];
-    _norm2._x = n[0]; _norm2._y = n[1]; _norm2._z = n[2];
-    _norm3._x = n[0]; _norm3._y = n[1]; _norm3._z = n[2];
-}
-
-ThreeD::ThreeD(const char* filename) :_sizeCoord(0), _sizeText(0),  _sizeNorm(0), _sizeTri(0) {
+ThreeD::ThreeD(const char* filename) :_sizeCoord(0), _sizeText(0),  _sizeNorm(0), _sizeTri(0), _sizeLight(0) {
     char ch[100];
     std::ifstream fin(filename);
     if (!fin)
@@ -142,7 +68,7 @@ ThreeD::ThreeD(const char* filename) :_sizeCoord(0), _sizeText(0),  _sizeNorm(0)
                     newTri[_sizeTri - 1]._norm2 = _norm[face._vn[km[1]]];
                     newTri[_sizeTri - 1]._norm3 = _norm[face._vn[km[2]]];
                 }
-                if (_sizeCoord > 0) {
+                if (_sizeText> 0) {
                     newTri[_sizeTri - 1]._tcoord1 = _textCoord[face._vt[km[0]]];
                     newTri[_sizeTri - 1]._tcoord2 = _textCoord[face._vt[km[1]]];
                     newTri[_sizeTri - 1]._tcoord3 = _textCoord[face._vt[km[2]]];
@@ -193,22 +119,16 @@ float min_elem(float* x, int size) {
     return min;
 }
 void ThreeD::triangle(Triangle tri, Image& image, Image& text) {
-    float x[3];
-    float y[3];
-    float z[3];
-    float xt[3];
-    float yt[3];
-    x[0] = tri._coord1->_x; y[0] = tri._coord1->_y; z[0] = tri._coord1->_z;
-    x[1] = tri._coord2->_x; y[1] = tri._coord2->_y; z[1] = tri._coord2->_z;
-    x[2] = tri._coord3->_x; y[2] = tri._coord3->_y; z[2] = tri._coord3->_z;
-    xt[1] = tri._tcoord1._x; yt[1] = tri._tcoord1._y;
-    xt[2] = tri._tcoord2._x; yt[2] = tri._tcoord2._y;
-    xt[0] = tri._tcoord3._x; yt[0] = tri._tcoord3._y;
+    float x[3]={ tri._coord1->_x, tri._coord2->_x, tri._coord3->_x };
+    float y[3]={ tri._coord1->_y, tri._coord2->_y, tri._coord3->_y };
+    float z[3]={ tri._coord1->_z, tri._coord2->_z, tri._coord3->_z };
+
+    float xt[3]={ tri._tcoord3._x, tri._tcoord1._x, tri._tcoord2._x };
+    float yt[3]={ tri._tcoord3._y, tri._tcoord1._y, tri._tcoord2._y };
 
     double nx[3] = { tri._norm3._x,tri._norm1._x, tri._norm2._x , };
     double ny[3] = { tri._norm3._y,tri._norm1._y, tri._norm2._y , };
     double nz[3] = { tri._norm3._z,tri._norm1._z, tri._norm2._z , };
-
 
     float xmin = min_elem(x, 3);
     float ymin = min_elem(y, 3);
@@ -239,15 +159,38 @@ void ThreeD::triangle(Triangle tri, Image& image, Image& text) {
                 yc += yt[k] * lambda[k];
 			}
 			if (l && image.ZbuffIfSet(z0, i, j)) {
-				double l[3] = { 0,0,1 };
+                double s = -0.001;
+                double sn2 = -0.001;
+                double sn21=-0.001;
+                for (int cur = 0; cur < _sizeLight; cur++)
+                {
+                    Coord l = _lights[cur].getCoord();
+                    double lengthL = std::sqrt(std::pow(l._x, 2) + std::pow(l._y, 2) + std::pow(l._z, 2));
+                    float vect[3] = { l._x / lengthL, l._y / lengthL, l._z / lengthL };
+                    double sn = xn * vect[0] + yn * vect[1] + zn * vect[2];
+                    sn = sn > 0 ? 0 : sn;
+                    sn2 = 1 / sn;
+                    sn2 = sn * abs(sn);// sn2* abs(sn2)* abs(sn2)* abs(sn2)* abs(sn2)* abs(sn2);
+                    sn21 = -1- sn * abs(sn);// sn2* abs(sn2)* abs(sn2)* abs(sn2)* abs(sn2)* abs(sn2);
+                    //sn2 = 1 / sn2;
+                    if (sn < s)
+                        s = sn;
+                    //s = (s + sn2) / 2;
+                    //if(sn2<s)
+                    //    s = sn2;
+                }
+                
+				/*double l[3] = { 0,0,1 };
 				double lengthL = std::sqrt(std::pow(l[0], 2) + std::pow(l[1], 2) + std::pow(l[2], 2));
-				double s = xn * l[0] + yn * l[1] + zn * l[2];
+				double s = xn * l[0] + yn * l[1] + zn * l[2];*/
 				//double length = std::sqrt(std::pow(xn, 2) + std::pow(yn, 2) + std::pow(zn, 2));
 				//s /= length * lengthL;
-				if (s <= 0) return;
+				if (s >= 0) return;
 
 				Color3 c = text.get((int)(xc*text.width()),(int)(yc * text.height()));
-                c = c.intensity(s);
+                c = c.intensity(-s);
+                //c._g *= -sn2;
+                //c._r *= -sn21;
 				image.set(i, j, c);
 			}
 		}
@@ -301,12 +244,12 @@ void ThreeD::line(Image& image, int x0, int y0, int x1, int y1, Color3 color, fl
 }
 
 void ThreeD::toPerspectiv(float ax, float ay, int u0, int v0) {
-    float zn = 1, zf = 100;
+    float zn = -100, zf = 100;
     for (int i = 0; i < _sizeCoord; ++i) {
 
         _coord[i]._x = (_coord[i]._x * ax) / _coord[i]._z + u0;
         _coord[i]._y = (_coord[i]._y * ay) / _coord[i]._z + v0;
-        _coord[i]._z = (zf / (zf - zn)) * (1 - zn / _coord[i]._z);
+        _coord[i]._z = (zf / (zf - zn)) * (1 - zn / _coord[i]._z)*100;
     }
 }
 
@@ -337,9 +280,33 @@ void ThreeD::MoveTo(Coord coord) {
     MoveTo(coord._x, coord._y, coord._z);
 }
 
-void ThreeD::Norm() {
+void ThreeD::ToCenter() {
     float x_max, y_max, z_max;
-    x_max = y_max = z_max = 0;
+    float x_min, y_min, z_min;
+    x_max = y_max = z_max = -20000000.f;
+    x_min = y_min = z_min = 20000000.f;
+    for (int i = 0; i < _sizeCoord; ++i) {
+        x_max = _coord[i]._x > x_max ? _coord[i]._x : x_max;
+        y_max = _coord[i]._y > y_max ? _coord[i]._y : y_max;
+        z_max = _coord[i]._z > z_max ? _coord[i]._z : z_max;
+        x_min = _coord[i]._x < x_min ? _coord[i]._x : x_min;
+        y_min = _coord[i]._y < y_min ? _coord[i]._y : y_min;
+        z_min = _coord[i]._z < z_min ? _coord[i]._z : z_min;
+    }
+    x_min = x_max-(x_max - x_min) / 2;
+    y_min = y_max-(y_max - y_min) / 2;
+    z_min = z_max-(z_max - z_min) / 2;
+    for (int i = 0; i < _sizeCoord; ++i) {
+        _coord[i]._x-= x_min;
+        _coord[i]._y-= y_min;
+        _coord[i]._z-= z_min;
+    }
+}
+
+void ThreeD::Norm() {
+    //ToCenter();
+    float x_max, y_max, z_max;
+    x_max = y_max = z_max = -20000000.f;
     for (int i = 0; i < _sizeCoord; ++i) {
         x_max = abs(_coord[i]._x) > x_max ? abs(_coord[i]._x) : x_max;
         y_max = abs(_coord[i]._y) > y_max ? abs(_coord[i]._y) : y_max;

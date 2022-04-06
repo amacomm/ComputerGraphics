@@ -4,7 +4,7 @@
 #include <iostream>
 #include <omp.h>
 
-Color3::Color3(int r = 0, int g = 0, int b = 0) :
+Color3::Color3(unsigned char r, unsigned char g, unsigned char b) :
     _r(r), _g(g), _b(b) {};
 
 Color3 Color3::intensity(float proc) {
@@ -52,6 +52,17 @@ const Color3& Image::get(int y, int x) const {
 void Image::save(char* filename) const {
     BMP24_save((unsigned char*)_image, _height, _width, filename);
 }
+
+void Image::save32bit(char* filename) const {
+    unsigned char* im = new unsigned char[_height * _width * 4];
+    int s = 3;
+    im[0] = _image[0];
+    im[1] = _image[1];
+    im[2] = _image[2];
+    for (int i = 3; i < _height * _width * 4; im[i++] = (i - 1) % 4 == 3 ? ((_image[s - 3] > 0 || _image[s - 2] > 0 || _image[s - 1] > 0) ? 255 : 0) : _image[s++]);
+    BMP32_save(im, _height, _width, filename);
+}
+
 
 bool Image::ZbuffIfSet(double z, int i, int j) {
     return z_buff.ifSet(z, i, j);

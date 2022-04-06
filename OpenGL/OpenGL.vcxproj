@@ -146,12 +146,15 @@
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="Structers.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BMP.h" />
+    <ClInclude Include="Emitters.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="Structers.h" />
     <ClInclude Include="World.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

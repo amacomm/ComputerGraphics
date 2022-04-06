@@ -2,8 +2,8 @@
 
 class Color3 {
 public:
-    int _r, _g, _b;
-    Color3(int r, int g, int b);
+    unsigned char _r, _g, _b;
+    Color3(unsigned char r=0, unsigned char g=0, unsigned char b=0);
     ~Color3() {};
     Color3 intensity(float proc);
 };
@@ -32,6 +32,7 @@ public:
     void set(int x, int y, const Color3& value);
     const Color3& get(int x, int y) const;
     void save(char* filename) const;
+    void save32bit(char* filename) const;
     void save8bit(char* filename, char** colore) const;
     void save1bit(char* filename, char** colore = new char* [2]{ new char[] { (char)0, (char)0, (char)0, (char)255 }, new char[] { (char)255, (char)255, (char)255, (char)255 } }) const;
     void show();
