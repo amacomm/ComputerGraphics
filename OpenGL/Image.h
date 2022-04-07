@@ -36,5 +36,10 @@ public:
     void save8bit(char* filename, char** colore) const;
     void save1bit(char* filename, char** colore = new char* [2]{ new char[] { (char)0, (char)0, (char)0, (char)255 }, new char[] { (char)255, (char)255, (char)255, (char)255 } }) const;
     void show();
+    void clear(Color3 color=Color3() ) {
+        for (int i = 0; i < _width; i++)
+            for (int j = 0; j < _height; j++)
+                set(j, i, color);
+    }
     ~Image();
 };
